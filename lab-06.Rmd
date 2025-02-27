@@ -1,7 +1,7 @@
 ---
 title: "Lab 06 - Ugly charts and Simpson's paradox"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Olivia Zhang"
+date: "02/27/2025"
 output: github_document
 ---
 
@@ -11,21 +11,53 @@ output: github_document
 library(tidyverse) 
 library(dsbox)
 library(mosaicData) 
+
+staff <- read_csv("data/instructional-staff.csv")
+
+#wide to long
+staff_long <- staff %>%
+  pivot_longer(cols = -faculty_type, names_to = "year") %>%
+  mutate(value = as.numeric(value))
 ```
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
+```{r line-plot, fig.height=5, fig.width=10}
+staff_long %>%
+  ggplot(aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = faculty_type
+  )) +
+  geom_line() +
+  labs(title = "Trends in Instractional Staff Employmees", 
+       subtitle = "between 1975 and 2011", 
+       x = "Year", 
+       y = "Percentage of Hires", 
+       color = "Faculty Type")
+```
+
 
 ### Exercise 2
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
+To make the porportion of part-time faculty pop up, I would change the color of other faculty types to black.
+```{r line-plot-part-time, fig.height=5, fig.width=10}
+staff_long %>%
+  ggplot(aes(
+    x = year,
+    y = value,
+    group = faculty_type,
+    color = ifelse(faculty_type == "Part-Time Faculty", "red", "black")
+  )) +
+  geom_line() +
+  labs(title = "Trends in Instractional Staff Employmees", 
+       subtitle = "between 1975 and 2011", 
+       x = "Year", 
+       y = "Percentage of Hires", 
+       color = "Faculty Type")
+```
+
 
 ### Exercise 3
 
