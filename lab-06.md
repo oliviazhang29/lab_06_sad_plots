@@ -64,7 +64,7 @@ staff_long %>%
 ![](lab-06_files/figure-gfm/line-plot-part-time-1.png)<!-- -->
 
 ``` r
-#the general idea is right, but the color and legend are wierd.
+#not sure how to get the legends show up.
 ```
 
 ### Exercise 3
@@ -79,41 +79,37 @@ create a histogram/barplot that shows the percentage of fish capture and
 aquaculture for each country.
 
 ``` r
-capture <- fisheries %>%
+#wide to long, filter out total >= 100000
+fisheries_long <- fisheries %>%
+  arrange(desc(total)) %>%
   filter(total >= 100000) %>%
-#  ggplot(aes(x = fct_reorder(country, desc(total)), y = capture, group = capture)) +
-  ggplot() +
-  geom_point(aes(x = country, y = capture)) +
-  geom_point(aes(x = country, y = aquaculture)) +
-#  labs(
-#    title = "Tonnage of Fish Captured and Farmed in 2016",
-#    x = "Country",
-#    y = "Total Tonnage of Fish Captured and Farmed") +
-  scale_y_log10(labels = scales::label_number(accuracy = 1)) +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1) # Tilt x-axis ticks
-  )
-capture
-```
+#  select("country", "capture", "aquaculture") %>%
+  pivot_longer(cols = -country, names_to = "type") %>%
+  mutate(value = as.numeric(value)) 
 
-    ## Warning in scale_y_log10(labels = scales::label_number(accuracy = 1)): log-10
-    ## transformation introduced infinite values.
+fisheries_long %>%
+  ggplot(aes(x = fct_inorder(country), y = value, fill = type)) +
+#  geom_bar(stat='identity', position = "stack", width = .7) +
+  geom_bar(stat='identity', width = .7) +
+  facet_wrap(~ type, nrow = 3, scales = "free_y") +
+  labs(
+    title = "Tonnage of Total Fish Captured and Farmed in 2016",
+    x = "Country",
+    y = "Total Tonnage of Fish Captured and Farmed", 
+    fill = "Type") +
+#  scale_y_continuous(breaks = scales::breaks_extended(n = 4), labels = fisheries_long$value) +
+  scale_y_continuous(labels = scales::label_number(accuracy = 1)) +
+#  scale_y_continuous(
+#    trans = "log",  # Apply log transformation
+#    labels = scales::trans_format("log10", scales::math_format(10^.x))  # Show original y-axis values
+#  ) +
+  theme_minimal(base_size = 8) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1) # Tilt x-axis ticks
+  ) 
+```
 
 ![](lab-06_files/figure-gfm/density-plot-1.png)<!-- -->
 
-``` r
-aquaculture <- fisheries %>%
-  filter(total >= 100000) %>%
-  ggplot(aes(x = fct_reorder(country, aquaculture), y = aquaculture, color = "blue")) +
-  geom_density() +
-  labs(
-    title = "Tonnage of Fish Captured and Farmed in 2016",
-    x = "Country",
-    y = "Total Tonnage of Fish Captured and Farmed") +
-  scale_y_log10()
-
-
-#capture + aquaculture +
-#  position("dodge") +
-#  labs(color = "Type")
-```
+I tried numerous ways but haven’t figured out how to make the y axis
+clear enough to show the differences but also display the original
+values.
